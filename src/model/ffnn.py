@@ -41,7 +41,7 @@ class FFNN:
             layer.update(learning_rate)
 
     def train(self, X_train, y_train, X_val=None, y_val=None, 
-              epochs=100, batch_size=32, learning_rate=0.01, verbose=1, tol=1e-6, patience = 10):
+              epochs=100, batch_size=32, learning_rate=0.01, verbose=1, tol=1e-4, patience = 10):
         history = {'train_loss': [], 'val_loss': []}
         num_samples = X_train.shape[0]
         
@@ -78,10 +78,10 @@ class FFNN:
 
                 if verbose:
                     print(f"Epoch {epoch+1}/{epochs} "
-                          f"- Train Loss: {epoch_loss:.4f} - Val Loss: {val_loss:.4f}")
+                          f"- Train Loss: {epoch_loss:.8f} - Val Loss: {val_loss:.8f}")
             else:
                 if verbose:
-                    print(f"Epoch {epoch+1}/{epochs} - Train Loss: {epoch_loss:.4f}")
+                    print(f"Epoch {epoch+1}/{epochs} - Train Loss: {epoch_loss:.8f}")
                     
             if abs(epoch_loss - best_loss) < tol:
                 no_improve_count += 1

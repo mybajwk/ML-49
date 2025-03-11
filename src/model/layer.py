@@ -13,7 +13,7 @@ class Layer:
         self.init_params = init_params
 
         self.weights = WeightInitializer.initialize(input_dim, output_dim,
-                                                    method=weight_init, init_params=init_params)
+                                                    method=weight_init, init_params=init_params, activation=activation_name)
         self.biases = tc.zeros((1, output_dim))
         self.activation, self.d_activation = activation_functions[activation_name]
 
