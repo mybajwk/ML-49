@@ -132,17 +132,21 @@ class FFNN:
             '#C7CEEA'   
         ]
         layer_weights = []
+        layer_grad_weights = []
         layer_sizes = []
-        
         for layer in self.layers:
             if isinstance(layer.weights, tc.Tensor):
                 weights = layer.weights.detach().cpu().numpy()
             else:
                 weights = np.array(layer.weights)
-            
             layer_weights.append(weights)
+            if isinstance(layer.grad_weights, tc.Tensor):
+                grad_weights = layer.grad_weights.detach().cpu().numpy()
+            else:
+                grad_weights = np.array(layer.grad_weights)
+            layer_grad_weights.append(grad_weights)
             if len(layer_sizes) == 0:
-                layer_sizes.append(weights.shape[0]) 
+                layer_sizes.append(weights.shape[0])
                 layer_sizes.append(weights.shape[1])
             else:
                 layer_sizes.append(weights.shape[1])
@@ -154,7 +158,6 @@ class FFNN:
                 limited_nodes.append(random.sample(range(size), limited_size))
         pos = {}
         layer_spacing = 1.5  
-        
         for layer_idx, nodes in enumerate(limited_nodes):
             for i, node_idx in enumerate(nodes):
                 x = layer_idx * layer_spacing
@@ -172,6 +175,8 @@ class FFNN:
             for s_idx in source_nodes:
                 for t_idx in target_nodes:
                     weight_value = layer_weights[layer_idx][s_idx, t_idx]
+                    grad_weight_value = layer_grad_weights[layer_idx][s_idx, t_idx]
+                    
                     edge_color = random.choice(light_colors)
                     start_pos = pos[(layer_idx, s_idx)]
                     end_pos = pos[(layer_idx + 1, t_idx)]
@@ -182,14 +187,15 @@ class FFNN:
                     offset_x = random.uniform(-0.2, 0.2)
                     offset_y = random.uniform(-0.05, 0.05)
                     angle = math.degrees(math.atan2(end_pos[1] - start_pos[1], end_pos[0] - start_pos[0]))
-                    weight_text = f"w = {weight_value:.4f}"
                     if angle > 90:
                         angle -= 180
                     elif angle < -90:
                         angle += 180
+                    weight_text = f"w = {weight_value:.4f} g = {grad_weight_value:.4f}"
                     plt.text(mid_x + offset_x, mid_y + offset_y, weight_text, 
                             fontsize=7, ha='center', va='center', color='black',
                             bbox=dict(facecolor=edge_color, alpha=0.9, pad=1, boxstyle='round'))
+
         plt.title('Neural Network Structure')
         plt.axis('off')
         plt.tight_layout()
