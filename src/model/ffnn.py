@@ -1,13 +1,15 @@
 import torch as tc
 from .layer import Layer
 from .loss_functions import loss_functions
-
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+import plotly.graph_objects as go
+import random
+import math
 class FFNN:
     def __init__(self, layer_sizes, activations_list,
                  loss_function='mse', weight_init='random_uniform', init_params=None):
-        
-        
-        
         if loss_function not in loss_functions:
             raise NotImplementedError(f"Loss function '{loss_function}' tidak dikenali.")
         self.loss_func, self.loss_grad_func = loss_functions[loss_function]
@@ -108,10 +110,87 @@ class FFNN:
                 self.layers[idx].plot_weight_distribution()
             else:
                 print(f"Layer index {idx} tidak ada.")
-
-    def plot_gradients(self, layer_indices):
-        for idx in layer_indices:
-            if idx < len(self.layers):
-                self.layers[idx].plot_gradient_distribution()
+    def plot_weight_distribution(self):
+        plt.hist(self.weights.detach().cpu().numpy().flatten(), bins=30)
+        plt.title("Distribusi Bobot")
+        plt.xlabel("Nilai Bobot")
+        plt.ylabel("Frekuensi")
+        plt.show()
+    def plot_network_structure(self,limited_size):
+        if not self.layers:
+            print("Model tidak memiliki layer.")
+            return
+        plt.figure(figsize=(20, 14))
+        light_colors = [
+            '#FFD3B6',  
+            '#DCEDC1',  
+            '#A8E6CE',  
+            '#FFAAA5',  
+            '#D5E5F2',  
+            '#E8E1EF',  
+            '#FFF1BD', 
+            '#C7CEEA'   
+        ]
+        layer_weights = []
+        layer_sizes = []
+        
+        for layer in self.layers:
+            if isinstance(layer.weights, tc.Tensor):
+                weights = layer.weights.detach().cpu().numpy()
             else:
-                print(f"Layer index {idx} tidak ada.")
+                weights = np.array(layer.weights)
+            
+            layer_weights.append(weights)
+            if len(layer_sizes) == 0:
+                layer_sizes.append(weights.shape[0]) 
+                layer_sizes.append(weights.shape[1])
+            else:
+                layer_sizes.append(weights.shape[1])
+        limited_nodes = []
+        for size in layer_sizes:
+            if size <= limited_size:
+                limited_nodes.append(list(range(size)))
+            else:
+                limited_nodes.append(random.sample(range(size), limited_size))
+        pos = {}
+        layer_spacing = 1.5  
+        
+        for layer_idx, nodes in enumerate(limited_nodes):
+            for i, node_idx in enumerate(nodes):
+                x = layer_idx * layer_spacing
+                y = (i - len(nodes)/2) * 0.7 
+                pos[(layer_idx, node_idx)] = (x, y)
+        for layer_idx, nodes in enumerate(limited_nodes):
+            for node_idx in nodes:
+                plt.scatter(*pos[(layer_idx, node_idx)], s=2000, c='skyblue', zorder=2, edgecolor='black')
+                plt.text(*pos[(layer_idx, node_idx)], f"{layer_idx}-{node_idx}", 
+                        ha='center', va='center', fontsize=10, fontweight='bold')
+        for layer_idx in range(len(limited_nodes) - 1):
+            source_nodes = limited_nodes[layer_idx]
+            target_nodes = limited_nodes[layer_idx + 1]
+            
+            for s_idx in source_nodes:
+                for t_idx in target_nodes:
+                    weight_value = layer_weights[layer_idx][s_idx, t_idx]
+                    edge_color = random.choice(light_colors)
+                    start_pos = pos[(layer_idx, s_idx)]
+                    end_pos = pos[(layer_idx + 1, t_idx)]
+                    plt.plot([start_pos[0], end_pos[0]], [start_pos[1], end_pos[1]], 
+                            color=edge_color, alpha=0.8, zorder=1, linewidth=2)
+                    mid_x = (start_pos[0] + end_pos[0]) / 2
+                    mid_y = (start_pos[1] + end_pos[1]) / 2
+                    offset_x = random.uniform(-0.2, 0.2)
+                    offset_y = random.uniform(-0.05, 0.05)
+                    angle = math.degrees(math.atan2(end_pos[1] - start_pos[1], end_pos[0] - start_pos[0]))
+                    weight_text = f"w = {weight_value:.4f}"
+                    if angle > 90:
+                        angle -= 180
+                    elif angle < -90:
+                        angle += 180
+                    plt.text(mid_x + offset_x, mid_y + offset_y, weight_text, 
+                            fontsize=7, ha='center', va='center', color='black',
+                            bbox=dict(facecolor=edge_color, alpha=0.9, pad=1, boxstyle='round'))
+        plt.title('Neural Network Structure')
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()

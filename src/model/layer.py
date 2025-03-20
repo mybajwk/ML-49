@@ -23,7 +23,8 @@ class Layer:
 
         self.grad_weights = tc.zeros_like(self.weights)
         self.grad_biases = tc.zeros_like(self.biases)
-
+        # print("self weight",self.weights)
+        # print("Weight tensor size:", self.weights.size())
     def forward(self, X):
         self.input = X
         self.net = X @ self.weights + self.biases  
@@ -73,3 +74,5 @@ class Layer:
         plt.xlabel("Nilai Gradien")
         plt.ylabel("Frekuensi")
         plt.show()
+
+
