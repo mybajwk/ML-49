@@ -60,19 +60,3 @@ class Layer:
         print("Gradients (Biases):")
         print(self.grad_biases)
         print("-" * 50)
-
-    def plot_weight_distribution(self):
-        plt.hist(self.weights.flatten().cpu().numpy(), bins=30)
-        plt.title("Distribusi Bobot")
-        plt.xlabel("Nilai Bobot")
-        plt.ylabel("Frekuensi")
-        plt.show()
-
-    def plot_gradient_distribution(self):
-        plt.hist(self.grad_weights.flatten().cpu().numpy(), bins=30)
-        plt.title("Distribusi Gradien Bobot")
-        plt.xlabel("Nilai Gradien")
-        plt.ylabel("Frekuensi")
-        plt.show()
-
-

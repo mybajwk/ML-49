@@ -103,18 +103,58 @@ class FFNN:
         for idx, layer in enumerate(self.layers):
             print(f"Layer {idx+1}:")
             layer.summary()
-
-    def plot_weights(self, layer_indices):
-        for idx in layer_indices:
-            if idx < len(self.layers):
-                self.layers[idx].plot_weight_distribution()
+    def plot_gradients_distribution(self, layers_to_plot,bins=100, normalized=True):
+        if not layers_to_plot:
+            print("Tidak ada layer yang dipilih untuk plot distribusi bobot.")
+            return
+        plt.figure(figsize=(12, 8))
+        for layer_index in layers_to_plot:
+            if layer_index < 0 or layer_index >= len(self.layers):
+                print(f"Layer index {layer_index} berada di luar jangkauan. Abaikan.")
+                continue
+            weights = self.layers[layer_index].weights
+            if isinstance(weights, tc.Tensor):
+                weights = weights.detach().cpu().numpy()
             else:
-                print(f"Layer index {idx} tidak ada.")
-    def plot_weight_distribution(self):
-        plt.hist(self.weights.detach().cpu().numpy().flatten(), bins=30)
-        plt.title("Distribusi Bobot")
+                weights = np.array(weights)
+            weights_flat = weights.flatten()
+            if normalized:
+                norm_weights = np.ones_like(weights_flat) / len(weights_flat)
+                plt.hist(weights_flat, bins=bins, weights=norm_weights, alpha=0.5, label=f"Layer {layer_index}")
+            else:
+                plt.hist(weights_flat, bins=bins, alpha=0.5, label=f"Layer {layer_index}")
+
+        plt.title("Distribusi Bobot Tiap Layer")
         plt.xlabel("Nilai Bobot")
-        plt.ylabel("Frekuensi")
+        plt.ylabel("Frekuensi (Persentase)" if normalized else "Jumlah Instance")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    def plot_weight_distribution(self, layers_to_plot,bins=100, normalized=True):
+        if not layers_to_plot:
+            print("Tidak ada layer yang dipilih untuk plot distribusi bobot.")
+            return
+        plt.figure(figsize=(12, 8))
+        for layer_index in layers_to_plot:
+            if layer_index < 0 or layer_index >= len(self.layers):
+                print(f"Layer index {layer_index} berada di luar jangkauan. Abaikan.")
+                continue
+            weights = self.layers[layer_index].weights
+            if isinstance(weights, tc.Tensor):
+                weights = weights.detach().cpu().numpy()
+            else:
+                weights = np.array(weights)
+            weights_flat = weights.flatten()
+            if normalized:
+                norm_weights = np.ones_like(weights_flat) / len(weights_flat)
+                plt.hist(weights_flat, bins=bins, weights=norm_weights, alpha=0.5, label=f"Layer {layer_index}")
+            else:
+                plt.hist(weights_flat, bins=bins, alpha=0.5, label=f"Layer {layer_index}")
+        plt.title("Distribusi Bobot Tiap Layer")
+        plt.xlabel("Nilai Bobot")
+        plt.ylabel("Frekuensi (Persentase)" if normalized else "Jumlah Instance")
+        plt.legend()
+        plt.grid(True)
         plt.show()
     def plot_network_structure(self,limited_size):
         if not self.layers:
