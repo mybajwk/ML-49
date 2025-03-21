@@ -97,7 +97,53 @@ class FFNN:
                 break
 
         return history
-    
+
+    def save(self, file_path):
+        """Saves the model to a file."""
+        # Extract layer sizes from the layers list
+        layer_sizes = []
+        if self.layers:
+            # Get the input size of the first layer from its weights shape
+            layer_sizes.append(self.layers[0].weights.shape[0])
+            # Get the output size of each layer
+            for layer in self.layers:
+                layer_sizes.append(layer.weights.shape[1])
+        
+        # Create a state dictionary with all necessary information to rebuild the model
+        state = {
+            'layer_sizes': layer_sizes,
+            'activations': [layer.activation_name for layer in self.layers],
+            'loss_name': self.loss_name,
+            'weight_init': self.layers[0].weight_init if self.layers else 'random_uniform',
+            # Save weights and biases for each layer
+            'weights': [layer.weights.detach() for layer in self.layers],
+            'biases': [layer.biases.detach() for layer in self.layers],
+        }
+        tc.save(state, file_path)
+        print(f"Model saved to {file_path}")
+
+    @classmethod
+    def load(cls, file_path):
+        """Loads the model from a file."""
+        # Load the checkpoint with weights_only=False
+        checkpoint = tc.load(file_path, map_location="cpu", weights_only=False)
+        
+        # Rebuild the model with the saved architecture
+        model = cls(
+            layer_sizes=checkpoint['layer_sizes'],
+            activations_list=checkpoint['activations'],
+            loss_function=checkpoint['loss_name'],
+            weight_init=checkpoint.get('weight_init', 'random_uniform')
+        )
+        
+        # Restore the weights and biases
+        for i, layer in enumerate(model.layers):
+            layer.weights = checkpoint['weights'][i]
+            layer.biases = checkpoint['biases'][i]
+        
+        print(f"Model loaded from {file_path}")
+        return model
+        
     def summary(self):
         print("Model Summary:")
         for idx, layer in enumerate(self.layers):
