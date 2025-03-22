@@ -43,7 +43,7 @@ class FFNN:
             layer.update(learning_rate)
 
     def train(self, X_train, y_train, X_val=None, y_val=None, 
-              epochs=100, batch_size=32, learning_rate=0.01, verbose=1, tol=1e-4, patience = 10):
+              epochs=100, batch_size=32, learning_rate=0.01, verbose=1, tol=1e-4, patience = 10, stop_in_convergence = False):
         history = {'train_loss': [], 'val_loss': []}
         num_samples = X_train.shape[0]
         
@@ -84,17 +84,18 @@ class FFNN:
             else:
                 if verbose:
                     print(f"Epoch {epoch+1}/{epochs} - Train Loss: {epoch_loss:.8f}")
-                    
-            if abs(epoch_loss - best_loss) < tol:
-                no_improve_count += 1
-            else:
-                no_improve_count = 0
-                best_loss = epoch_loss
             
-            if no_improve_count >= patience:
-                if verbose:
-                    print(f"Early stopping triggered at epoch {epoch+1} - loss did not improve more than {tol} for {patience} consecutive epochs.")
-                break
+            if stop_in_convergence:    
+                if abs(epoch_loss - best_loss) < tol:
+                    no_improve_count += 1
+                else:
+                    no_improve_count = 0
+                    best_loss = epoch_loss
+
+                if no_improve_count >= patience:
+                    if verbose:
+                        print(f"Early stopping triggered at epoch {epoch+1} - loss did not improve more than {tol} for {patience} consecutive epochs.")
+                    break
 
         return history
 

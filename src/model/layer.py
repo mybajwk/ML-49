@@ -15,8 +15,9 @@ class Layer:
         self.weights = WeightInitializer.initialize(input_dim, output_dim,
                                                     method=weight_init, init_params=init_params, activation=activation_name)
         self.biases = tc.zeros((1, output_dim))
-        self.activation, self.d_activation = activation_functions[activation_name]
+        self.activation, self.d_activation, self.d_activation_times_vector = activation_functions[activation_name]
 
+        
         self.input = None
         self.net = None  
         self.out= None  
@@ -33,11 +34,20 @@ class Layer:
 
     def backward(self, dO):
         m = self.input.shape[0]
+
         if self.activation_name == 'softmax':
-            error_term = dO
+            # non optimized
+            # jacobians = self.d_activation(self.net)  
+            # error_term = tc.zeros_like(dO)
+            # for i in range(m):
+            #     error_term[i] = dO[i] @ jacobians[i]
+                
+            #optimized
+            error_term = self.d_activation_times_vector(self.out, dO)
         else:
             error_term = dO * self.d_activation(self.net)
-        # self.grad_weights = (self.input.T @ error_term) / m
+
+         # self.grad_weights = (self.input.T @ error_term) / m
         self.grad_weights = (self.input.t() @ error_term) / m
         # self.grad_biases = tc.sum(error_term, axis=0, keepdims=True) / m
         self.grad_biases = tc.sum(error_term, dim=0, keepdims=True) / m

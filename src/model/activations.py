@@ -43,11 +43,33 @@ class Activations:
         # return ex / tc.sum(ex, axis=1, keepdim=True)
         ex = tc.exp(x - tc.max(x, dim=1, keepdim=True)[0])
         return ex / tc.sum(ex, dim=1, keepdim=True)
+    
+    def d_softmax(x):
+        s = Activations.softmax(x)
+        batch_size, dim = s.shape
+
+        diag_elements = s * (1 - s)  
+
+        off_diag_elements = -s.unsqueeze(2) * s.unsqueeze(1)  
+
+        jacobians = off_diag_elements  
+        diag_indices = tc.arange(dim)  
+        jacobians[:, diag_indices, diag_indices] = diag_elements 
+
+        return jacobians
+
+    def d_softmax_times_vector(out, dO):
+    
+        s_dot_v = tc.sum(out * dO, dim=1, keepdim=True)  
+    
+        result = out * (dO - s_dot_v)
+    
+        return result
 
 activation_functions = {
-    'linear': (Activations.linear, Activations.d_linear),
-    'relu': (Activations.relu, Activations.d_relu),
-    'sigmoid': (Activations.sigmoid, Activations.d_sigmoid),
-    'tanh': (Activations.tanh, Activations.d_tanh),
-    'softmax': (Activations.softmax, None)  
+    'linear': (Activations.linear, Activations.d_linear, None),
+    'relu': (Activations.relu, Activations.d_relu, None),
+    'sigmoid': (Activations.sigmoid, Activations.d_sigmoid, None),
+    'tanh': (Activations.tanh, Activations.d_tanh, None),
+    'softmax': (Activations.softmax, Activations.d_softmax, Activations.d_softmax_times_vector)  
 }

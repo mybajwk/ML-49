@@ -4,6 +4,10 @@ class WeightInitializer:
     def initialize(input_dim, output_dim, method=None, init_params=None, activation=None):
         init_params = init_params or {}
         
+        seed = init_params.get('seed', None)
+        if seed is not None:
+            tc.manual_seed(seed)
+        
         if method == "he_xavier":
             if activation in ['relu']:
                 method = 'he'  
