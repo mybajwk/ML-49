@@ -102,17 +102,17 @@ class FFNN:
                 if verbose:
                     print(f"Epoch {epoch+1}/{epochs} - Train Loss: {epoch_loss:.8f}")
             
-            if stop_in_convergence:    
-                if abs(epoch_loss - best_loss) < tol:
-                    no_improve_count += 1
-                else:
-                    no_improve_count = 0
-                    best_loss = epoch_loss
+            # if stop_in_convergence:    
+            #     if abs(epoch_loss - best_loss) < tol:
+            #         no_improve_count += 1
+            #     else:
+            #         no_improve_count = 0
+            #         best_loss = epoch_loss
 
-                if no_improve_count >= patience:
-                    if verbose:
-                        print(f"Early stopping triggered at epoch {epoch+1} - loss did not improve more than {tol} for {patience} consecutive epochs.")
-                    break
+            #     if no_improve_count >= patience:
+            #         if verbose:
+            #             print(f"Early stopping triggered at epoch {epoch+1} - loss did not improve more than {tol} for {patience} consecutive epochs.")
+            #         break
 
         return history
     def save(self, file_path):
