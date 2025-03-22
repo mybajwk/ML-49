@@ -2,36 +2,41 @@ import torch as tc
 import matplotlib.pyplot as plt
 from .activations import activation_functions
 from .initializers import WeightInitializer
+from .rms_norm import RMSNorm
 
 class Layer:
     def __init__(self, input_dim, output_dim, activation_name,
-                 weight_init='random_uniform', init_params=None):
+                 weight_init='random_uniform', init_params=None, use_rmsnorm=False):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.activation_name = activation_name
         self.weight_init = weight_init
         self.init_params = init_params
-
+        
+        self.use_rmsnorm = use_rmsnorm  
+        
         self.weights = WeightInitializer.initialize(input_dim, output_dim,
                                                     method=weight_init, init_params=init_params, activation=activation_name)
         self.biases = tc.zeros((1, output_dim))
         self.activation, self.d_activation, self.d_activation_times_vector = activation_functions[activation_name]
-
+        
+        if self.use_rmsnorm:
+            self.rmsnorm = RMSNorm(output_dim)  
         
         self.input = None
         self.net = None  
-        self.out= None  
+        self.out = None
 
-        self.grad_weights = tc.zeros_like(self.weights)
-        self.grad_biases = tc.zeros_like(self.biases)
-        # print("self weight",self.weights)
-        # print("Weight tensor size:", self.weights.size())
     def forward(self, X):
         self.input = X
         self.net = X @ self.weights + self.biases  
-        self.out= self.activation(self.net)
+        self.out = self.activation(self.net)
+        
+        if self.use_rmsnorm:
+            self.out = self.rmsnorm.forward(self.out)  
+        
         return self.out
-
+    
     def backward(self, dO):
         m = self.input.shape[0]
 
