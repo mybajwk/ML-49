@@ -66,10 +66,26 @@ class Activations:
     
         return result
 
+        return x / (1 + tc.abs(x))
+
+    def d_softsign(x):
+        return 1 / (1 + tc.abs(x)) ** 2
+
+    def leaky_relu(x, alpha=0.01):
+        return tc.maximum(alpha * x, x)
+
+    def d_leaky_relu(x, alpha=0.01):
+        dx = tc.ones_like(x)
+        dx[x < 0] = alpha
+        return dx
+
+
 activation_functions = {
     'linear': (Activations.linear, Activations.d_linear, None),
     'relu': (Activations.relu, Activations.d_relu, None),
     'sigmoid': (Activations.sigmoid, Activations.d_sigmoid, None),
     'tanh': (Activations.tanh, Activations.d_tanh, None),
-    'softmax': (Activations.softmax, Activations.d_softmax, Activations.d_softmax_times_vector)  
+    'softmax': (Activations.softmax, Activations.d_softmax, Activations.d_softmax_times_vector),
+    'softsign': (Activations.softsign, Activations.d_softsign, None),
+    'leaky_relu': (Activations.leaky_relu, Activations.d_leaky_relu, None)
 }
