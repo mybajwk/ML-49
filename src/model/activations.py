@@ -66,6 +66,7 @@ class Activations:
     
         return result
 
+    def softsign(x):
         return x / (1 + tc.abs(x))
 
     def d_softsign(x):
