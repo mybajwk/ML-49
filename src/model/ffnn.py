@@ -9,10 +9,13 @@ import random
 import math
 class FFNN:
     def __init__(self, layer_sizes, activations_list,
-                 loss_function='mse', weight_init='random_uniform', init_params=None):
+                 loss_function='mse', weight_init='random_uniform', init_params=None,
+                 regularization='none', req_lambda=0.01):
         if loss_function not in loss_functions:
             raise NotImplementedError(f"Loss function '{loss_function}' tidak dikenali.")
         self.loss_func, self.loss_grad_func = loss_functions[loss_function]
+        self.regularization = regularization
+        self.reg_lambda = req_lambda
 
         self.loss_name = loss_function
         self.layers = []
@@ -31,6 +34,20 @@ class FFNN:
         for layer in self.layers:
             output = layer.forward(output)
         return output
+    
+    def compute_loss_with_regularization(self, y_true, y_pred):
+        loss = self.loss_func(y_true, y_pred)
+        if self.regularization == 'L1':
+            reg_loss = 0.0
+            for layer in self.layers:
+                reg_loss += tc.sum(tc.abs(layer.weights))  
+            loss += self.reg_lambda * reg_loss
+        elif self.regularization == 'L2':
+            reg_loss = 0.0
+            for layer in self.layers:
+                reg_loss += tc.sum(layer.weights ** 2)  
+            loss += self.reg_lambda * reg_loss
+        return loss
 
 
     def backward(self, y_true, y_pred):
@@ -43,7 +60,7 @@ class FFNN:
             layer.update(learning_rate)
 
     def train(self, X_train, y_train, X_val=None, y_val=None, 
-              epochs=100, batch_size=32, learning_rate=0.01, verbose=1, tol=1e-4, patience = 10, stop_in_convergence = False):
+              epochs=100, batch_size=32, learning_rate=0.01, verbose=1, tol=1e-4, patience=10, stop_in_convergence=False):
         history = {'train_loss': [], 'val_loss': []}
         num_samples = X_train.shape[0]
         
@@ -64,7 +81,7 @@ class FFNN:
                 y_batch = y_train[i:i+batch_size]
 
                 y_pred = self.forward(X_batch)
-                loss = self.loss_func(y_batch, y_pred)
+                loss = self.compute_loss_with_regularization(y_batch, y_pred)
                 epoch_loss += loss.item() * X_batch.shape[0]
 
                 self.backward(y_batch, y_pred)
@@ -75,7 +92,7 @@ class FFNN:
 
             if X_val is not None and y_val is not None:
                 y_val_pred = self.forward(X_val)
-                val_loss = self.loss_func(y_val, y_val_pred).item()
+                val_loss = self.compute_loss_with_regularization(y_val, y_val_pred).item()
                 history['val_loss'].append(val_loss)
 
                 if verbose:
@@ -98,7 +115,6 @@ class FFNN:
                     break
 
         return history
-
     def save(self, file_path):
         layer_sizes = []
         if self.layers:
