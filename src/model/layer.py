@@ -13,7 +13,7 @@ class Layer:
         self.weight_init = weight_init
         self.init_params = init_params
         
-        self.use_rmsnorm = use_rmsnorm  
+        self.use_rmsnorm = use_rmsnorm
         
         self.weights = WeightInitializer.initialize(input_dim, output_dim,
                                                     method=weight_init, init_params=init_params, activation=activation_name)
@@ -21,25 +21,29 @@ class Layer:
         self.activation, self.d_activation, self.d_activation_times_vector = activation_functions[activation_name]
         
         if self.use_rmsnorm:
-            self.rmsnorm = RMSNorm(output_dim)  
+            self.rmsnorm = RMSNorm(output_dim)
         
         self.input = None
         self.net = None  
-        self.out = None
-
+        self.out_pre_norm = None  # output setelah aktivasi, sebelum RMSNorm
+        self.out = None         # output akhir (setelah RMSNorm, jika digunakan)
+    
     def forward(self, X):
         self.input = X
         self.net = X @ self.weights + self.biases  
-        self.out = self.activation(self.net)
-        
+        self.out_pre_norm = self.activation(self.net)
         if self.use_rmsnorm:
-            self.out = self.rmsnorm.forward(self.out)  
-        
+            self.out = self.rmsnorm.forward(self.out_pre_norm)
+        else:
+            self.out = self.out_pre_norm
         return self.out
     
     def backward(self, dO):
+        # Jika RMSNorm digunakan, lakukan backprop melalui RMSNorm terlebih dahulu
+        if self.use_rmsnorm:
+            dO = self.rmsnorm.backward(self.out_pre_norm, dO)
+        
         m = self.input.shape[0]
-
         if self.activation_name == 'softmax':
             # non optimized
             # jacobians = self.d_activation(self.net)  
@@ -48,7 +52,7 @@ class Layer:
             #     error_term[i] = dO[i] @ jacobians[i]
                 
             #optimized
-            error_term = self.d_activation_times_vector(self.out, dO)
+            error_term = self.d_activation_times_vector(self.out_pre_norm, dO)
         else:
             error_term = dO * self.d_activation(self.net)
 
@@ -63,7 +67,9 @@ class Layer:
     def update(self, learning_rate):
         self.weights -= learning_rate * self.grad_weights
         self.biases -= learning_rate * self.grad_biases
-
+        if self.use_rmsnorm:
+            self.rmsnorm.update(learning_rate)
+    
     def summary(self):
         print(f"Layer: {self.input_dim} -> {self.output_dim} | Activation: {self.activation_name}")
         print("Weights:")
