@@ -9,7 +9,7 @@ class WeightInitializer:
             tc.manual_seed(seed)
         
         if method == "he_xavier":
-            if activation in ['relu']:
+            if activation in ['relu', 'leaky_relu']:
                 method = 'he'  
             elif activation in ['sigmoid', 'tanh', 'softmax']:
                 method = 'xavier'  
