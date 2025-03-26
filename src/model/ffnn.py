@@ -18,7 +18,7 @@ class FFNN:
         self.reg_lambda = req_lambda
 
         self.loss_name = loss_function
-        self.layers = []
+        self.layers: list[Layer] = []
         for i in range(len(layer_sizes) - 1):
             layer = Layer(
                 layer_sizes[i], 
@@ -165,7 +165,7 @@ class FFNN:
             if layer_index < 0 or layer_index >= len(self.layers):
                 print(f"Layer index {layer_index} berada di luar jangkauan. Abaikan.")
                 continue
-            weights = self.layers[layer_index].weights
+            weights = self.layers[layer_index].grad_weights
             if isinstance(weights, tc.Tensor):
                 weights = weights.detach().cpu().numpy()
             else:
@@ -177,7 +177,7 @@ class FFNN:
             else:
                 plt.hist(weights_flat, bins=bins, alpha=0.5, label=f"Layer {layer_index}")
 
-        plt.title("Distribusi Bobot Tiap Layer")
+        plt.title("Distribusi Bobot Gradien Tiap Layer")
         plt.xlabel("Nilai Bobot")
         plt.ylabel("Frekuensi (Persentase)" if normalized else "Jumlah Instance")
         plt.legend()
