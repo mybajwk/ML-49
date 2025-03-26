@@ -10,7 +10,7 @@ import math
 class FFNN:
     def __init__(self, layer_sizes, activations_list,
                  loss_function='mse', weight_init='random_uniform', init_params=None,
-                 regularization='none', req_lambda=0.01):
+                 regularization='none', req_lambda=0.01, use_rmsnorm=False):
         if loss_function not in loss_functions:
             raise NotImplementedError(f"Loss function '{loss_function}' tidak dikenali.")
         self.loss_func, self.loss_grad_func = loss_functions[loss_function]
@@ -25,7 +25,8 @@ class FFNN:
                 layer_sizes[i+1],
                 activations_list[i],
                 weight_init=weight_init,
-                init_params=init_params
+                init_params=init_params,
+                use_rmsnorm=use_rmsnorm
             )
             self.layers.append(layer)
 
