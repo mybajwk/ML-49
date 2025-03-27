@@ -31,6 +31,7 @@ class Layer:
         self.input = X
         self.net = X @ self.weights + self.biases  
         self.out = self.activation(self.net)
+        self.raw_out = self.out
         
         if self.use_rmsnorm:
             self.out = self.rmsnorm.forward(self.out)  
@@ -40,29 +41,27 @@ class Layer:
     def backward(self, dO):
         m = self.input.shape[0]
 
-        if self.activation_name == 'softmax':
-            # non optimized
-            # jacobians = self.d_activation(self.net)  
-            # error_term = tc.zeros_like(dO)
-            # for i in range(m):
-            #     error_term[i] = dO[i] @ jacobians[i]
-                
-            #optimized
-            error_term = self.d_activation_times_vector(self.out, dO)
+        if self.use_rmsnorm:
+            d_raw = self.rmsnorm.backward(self.raw_out, dO, m)
         else:
-            error_term = dO * self.d_activation(self.net)
+            d_raw = dO
 
-         # self.grad_weights = (self.input.T @ error_term) / m
+        if self.activation_name == 'softmax':
+            error_term = self.d_activation_times_vector(self.raw_out, d_raw)
+        else:
+            error_term = d_raw * self.d_activation(self.net)
+        
         self.grad_weights = (self.input.t() @ error_term) / m
-        # self.grad_biases = tc.sum(error_term, axis=0, keepdims=True) / m
         self.grad_biases = tc.sum(error_term, dim=0, keepdims=True) / m
-        # dO_prev = error_term @ self.weights.T
         dO_prev = error_term @ self.weights.t()
         return dO_prev
+
     
     def update(self, learning_rate):
         self.weights -= learning_rate * self.grad_weights
         self.biases -= learning_rate * self.grad_biases
+        if self.use_rmsnorm:
+            self.rmsnorm.update(learning_rate)
 
     def summary(self):
         print(f"Layer: {self.input_dim} -> {self.output_dim} | Activation: {self.activation_name}")
