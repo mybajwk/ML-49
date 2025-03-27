@@ -38,23 +38,28 @@ class FFNN:
     
     def compute_loss_with_regularization(self, y_true, y_pred):
         loss = self.loss_func(y_true, y_pred)
-        if self.regularization == 'L1':
-            reg_loss = 0.0
-            for layer in self.layers:
-                reg_loss += tc.sum(tc.abs(layer.weights))  
-            loss += self.reg_lambda * reg_loss
-        elif self.regularization == 'L2':
-            reg_loss = 0.0
-            for layer in self.layers:
-                reg_loss += tc.sum(layer.weights ** 2)  
-            loss += self.reg_lambda * reg_loss
+        # if self.regularization == 'L1':
+        #     reg_loss = 0.0
+        #     for layer in self.layers:
+        #         reg_loss += tc.sum(tc.abs(layer.weights))  
+        #     loss += self.reg_lambda * reg_loss
+        # elif self.regularization == 'L2':
+        #     reg_loss = 0.0
+        #     for layer in self.layers:
+        #         reg_loss += tc.sum(layer.weights ** 2)
+        #     # Menggunakan faktor 1/2 agar gradien regulasi L2 menjadi λ * w
+        #     loss += (self.reg_lambda / 2) * reg_loss
         return loss
-
 
     def backward(self, y_true, y_pred):
         dO = self.loss_grad_func(y_true, y_pred)
         for layer in reversed(self.layers):
             dO = layer.backward(dO)
+            m = layer.input.shape[0]
+            if self.regularization == 'L1':
+                layer.grad_weights += self.reg_lambda * tc.sign(layer.weights) / m
+            elif self.regularization == 'L2':
+                layer.grad_weights += self.reg_lambda * layer.weights / m
 
     def update_weights(self, learning_rate):
         for layer in self.layers:
