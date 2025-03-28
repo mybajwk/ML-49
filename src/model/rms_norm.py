@@ -1,6 +1,6 @@
 import torch as tc
 class RMSNorm:
-    def __init__(self, num_features, eps=1e-8):
+    def __init__(self, num_features, eps=1e-5):
         self.eps = eps
         self.gamma = tc.ones(num_features)  
         self.beta = tc.zeros(num_features)  
@@ -19,5 +19,6 @@ class RMSNorm:
         return new_error_term
     
     def update(self, learning_rate):
-        self.gamma -= learning_rate * self.grad_gamma
-        self.beta -= learning_rate * self.grad_beta
+        # self.gamma -= learning_rate * self.grad_gamma
+        # self.beta -= learning_rate * self.grad_beta
+        return

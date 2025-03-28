@@ -17,7 +17,8 @@ class Layer:
         
         self.weights = WeightInitializer.initialize(input_dim, output_dim,
                                                     method=weight_init, init_params=init_params, activation=activation_name)
-        self.biases = tc.zeros((1, output_dim))
+        self.biases = WeightInitializer.initialize(1, output_dim,
+                                                    method=weight_init, init_params=init_params, activation=activation_name)
         self.activation, self.d_activation, self.d_activation_times_vector = activation_functions[activation_name]
         
         if self.use_rmsnorm:
@@ -32,9 +33,9 @@ class Layer:
         self.net = X @ self.weights + self.biases  
         self.out = self.activation(self.net)
         self.raw_out = self.out
-        
         if self.use_rmsnorm:
-            self.out = self.rmsnorm.forward(self.out)  
+            self.out = self.activation(self.rmsnorm.forward(self.net))  
+        
         
         return self.out
     
