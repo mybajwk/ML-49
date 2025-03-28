@@ -23,13 +23,35 @@ git clone https://github.com/mybajwk/ML-49.git
 cd ML-49
 ```
 
-### 2. Install dependency
+### 2. Buat Virtual Environment & Install Dependency
 
-Pastikan Python >= 3.8, dan install package berikut:
+Disarankan menggunakan virtual environment agar dependency terisolasi.
+
+#### a. Buat dan aktifkan virtual environment:
 
 ```bash
-pip install torch matplotlib plotly networkx numpy
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# MacOS/Linux
+source venv/bin/activate
 ```
+
+#### b. Install dependency dari `requirement.txt`:
+
+```bash
+pip install -r requirement.txt
+```
+
+#### c. (Opsional) Tambahkan kernel environment ke Jupyter Notebook:
+
+```bash
+pip install ipykernel
+python -m ipykernel install --user --name=venv-ml49 --display-name "Python (ML-49)"
+```
+
+Pastikan kernel `Python (ML-49)` dipilih saat membuka `main.ipynb` di VS Code.
+
 
 ### 3. Jalankan Notebook
 
