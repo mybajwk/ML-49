@@ -59,7 +59,7 @@ class FFNN:
             if self.regularization == 'L1':
                 layer.grad_weights += self.reg_lambda * tc.sign(layer.weights) / m
             elif self.regularization == 'L2':
-                layer.grad_weights += self.reg_lambda * layer.weights / m
+                layer.grad_weights += 2*(self.reg_lambda * layer.weights / m)
 
     def update_weights(self, learning_rate):
         for layer in self.layers:
