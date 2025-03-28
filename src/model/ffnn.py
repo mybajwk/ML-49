@@ -47,7 +47,6 @@ class FFNN:
             reg_loss = 0.0
             for layer in self.layers:
                 reg_loss += tc.sum(layer.weights ** 2) / layer.input.shape[0]
-            # Menggunakan faktor 1/2 agar gradien regulasi L2 menjadi λ * w
             loss += (self.reg_lambda / 2) * reg_loss
         return loss
 
