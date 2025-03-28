@@ -132,7 +132,8 @@ class FFNN:
             'layer_sizes': layer_sizes,
             'activations': [layer.activation_name for layer in self.layers],
             'loss_name': self.loss_name,
-            'weight_init': self.layers[0].weight_init if self.layers else 'random_uniform',
+            'weight_init': [layer.weight_init for layer in self.layers],
+            'init_params': [layer.init_params for layer in self.layers],
             'weights': [layer.weights.detach() for layer in self.layers],
             'biases': [layer.biases.detach() for layer in self.layers],
         }
@@ -147,7 +148,8 @@ class FFNN:
             layer_sizes=checkpoint['layer_sizes'],
             activations_list=checkpoint['activations'],
             loss_function=checkpoint['loss_name'],
-            weight_init=checkpoint.get('weight_init', 'random_uniform')
+            weight_inits=checkpoint.get('weight_init', 'random_uniform'),
+            init_params_list=checkpoint.get('init_params')
         )
         
         for i, layer in enumerate(model.layers):
