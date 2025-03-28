@@ -28,12 +28,12 @@ class WeightInitializer:
             std = variance ** 0.5
             # return tc.random.normal(mean, std, (input_dim, output_dim))
             return tc.randn((input_dim, output_dim)) * std + mean
-        elif method in ['xavier', 'he']:  # Pilihan He atau Xavier berdasarkan aktivasi
+        elif method in ['xavier', 'he']:  
             if activation in ['relu', 'leaky_relu']:
-                std = (2 / input_dim) ** 0.5  # He (Kaiming) Initialization
+                std = (2 / input_dim) ** 0.5  
                 return tc.randn((input_dim, output_dim)) * std
             elif activation in ['sigmoid', 'tanh', 'softmax']:
-                limit = (6 / (input_dim + output_dim)) ** 0.5  # Xavier (Glorot) Initialization
+                limit = (6 / (input_dim + output_dim)) ** 0.5  
                 return tc.empty((input_dim, output_dim)).uniform_(-limit, limit)
             else:
                 raise ValueError(f"Inisialisasi '{method}' tidak cocok untuk aktivasi '{activation}'")
