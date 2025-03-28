@@ -74,14 +74,18 @@ Berikut adalah cara untuk menginisialisasi model FFNN:
 from ffnn import FFNN
 
 model = FFNN(
-    layer_sizes=[4, 8, 3],                    # Ukuran layer: input, hidden, output
-    activations_list=["relu", "softmax"],     # Fungsi aktivasi per layer
-    loss_function="mse",                      # 'mse', 'bce', atau 'cce'
-    weight_init="he_xavier",                  # 'he', 'xavier', 'random_uniform', 'random_normal', 'zero', 'he_xavier'
-    init_params={"seed": 42},                 # Opsional: parameter tambahan (mis. seed, lower, upper, mean, variance)
-    regularization="L2",                      # 'none', 'L1', atau 'L2'
-    req_lambda=0.01,                          # Nilai lambda untuk regulasi
-    use_rmsnorm=True                          # Gunakan RMSNorm di setiap layer
+    layer_sizes=[4, 8, 6, 3],                          # Ukuran tiap layer: input, hidden1, hidden2, output
+    activations_list=["relu", "tanh", "softmax"],      # Fungsi aktivasi per layer
+    loss_function="mse",                               # 'mse', 'bce', atau 'cce'
+    weight_inits=["he", "xavier", "random_normal"],     # Inisialisasi bobot berbeda tiap layer
+    init_params_list=[                                  # Param tambahan untuk setiap metode
+        {"seed": 42},                                   # Untuk He
+        {"seed": 42},                                   # Untuk Xavier
+        {"mean": 0.0, "variance": 0.01, "seed": 42}     # Untuk Normal
+    ],
+    regularization="L2",                                # 'none', 'L1', atau 'L2'
+    req_lambda=0.01,                                    # Nilai lambda untuk regulasi
+    use_rmsnorm=True                                    # Gunakan RMSNorm di setiap layer
 )
 ```
 ### 📌 Detail Parameter `init_params`
@@ -92,7 +96,6 @@ Parameter `init_params` adalah dictionary opsional untuk mengatur parameter tamb
 |----------------------|----------------------------------------------------------|-----------------|
 | `random_uniform`     | `lower`, `upper`, `seed`                                 | -0.5, 0.5, None |
 | `random_normal`      | `mean`, `variance`, `seed`                               | 0.0, 1.0, None  |
-| `xavier` / `he`      | `seed`                                                   | None            |
 | `zero`               | `seed` (optional, jarang digunakan)                      | None            |
 | `he_xavier`          | `seed` (otomatis memilih `he` atau `xavier` sesuai aktivasi) | None        |
 
