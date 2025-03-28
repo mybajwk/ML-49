@@ -38,17 +38,17 @@ class FFNN:
     
     def compute_loss_with_regularization(self, y_true, y_pred):
         loss = self.loss_func(y_true, y_pred)
-        # if self.regularization == 'L1':
-        #     reg_loss = 0.0
-        #     for layer in self.layers:
-        #         reg_loss += tc.sum(tc.abs(layer.weights))  
-        #     loss += self.reg_lambda * reg_loss
-        # elif self.regularization == 'L2':
-        #     reg_loss = 0.0
-        #     for layer in self.layers:
-        #         reg_loss += tc.sum(layer.weights ** 2)
-        #     # Menggunakan faktor 1/2 agar gradien regulasi L2 menjadi λ * w
-        #     loss += (self.reg_lambda / 2) * reg_loss
+        if self.regularization == 'L1':
+            reg_loss = 0.0
+            for layer in self.layers:
+                reg_loss += tc.sum(tc.abs(layer.weights)) / layer.input.shape[0]
+            loss += self.reg_lambda * reg_loss
+        elif self.regularization == 'L2':
+            reg_loss = 0.0
+            for layer in self.layers:
+                reg_loss += tc.sum(layer.weights ** 2) / layer.input.shape[0]
+            # Menggunakan faktor 1/2 agar gradien regulasi L2 menjadi λ * w
+            loss += (self.reg_lambda / 2) * reg_loss
         return loss
 
     def backward(self, y_true, y_pred):
