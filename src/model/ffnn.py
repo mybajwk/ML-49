@@ -1,15 +1,16 @@
 import torch as tc
 from .layer import Layer
 from .loss_functions import loss_functions
-import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-import plotly.graph_objects as go
 import random
 import math
+
 class FFNN:
     def __init__(self, layer_sizes, activations_list,
-                 loss_function='mse', weight_init='random_uniform', init_params=None,
+                 loss_function='mse',
+                 weight_inits='random_uniform',
+                 init_params_list=None,
                  regularization='none', req_lambda=0.01, use_rmsnorm=False):
         if loss_function not in loss_functions:
             raise NotImplementedError(f"Loss function '{loss_function}' tidak dikenali.")
@@ -21,11 +22,11 @@ class FFNN:
         self.layers: list[Layer] = []
         for i in range(len(layer_sizes) - 1):
             layer = Layer(
-                layer_sizes[i], 
-                layer_sizes[i+1],
-                activations_list[i],
-                weight_init=weight_init,
-                init_params=init_params,
+                input_dim=layer_sizes[i],
+                output_dim=layer_sizes[i + 1],
+                activation_name=activations_list[i],
+                weight_init=weight_inits[i] if weight_inits else 'random_uniform',
+                init_params=init_params_list[i] if init_params_list else None,
                 use_rmsnorm=use_rmsnorm
             )
             self.layers.append(layer)
