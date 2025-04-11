@@ -31,30 +31,27 @@ class Layer:
     def forward(self, X):
         self.input = X
         self.net = X @ self.weights + self.biases  
-        self.out = self.activation(self.net)
-        self.raw_out = self.out
         if self.use_rmsnorm:
-            self.out = self.activation(self.rmsnorm.forward(self.net))  
-        
-        
+            self.normalized_net = self.rmsnorm.forward(self.net)
+            self.out = self.activation(self.normalized_net)
+        else:
+            self.out = self.activation(self.net)
         return self.out
+
     
     def backward(self, dO):
         m = self.input.shape[0]
-
-        if self.use_rmsnorm:
-            d_raw = self.rmsnorm.backward(self.raw_out, dO, m)
-        else:
-            d_raw = dO
-
         if self.activation_name == 'softmax':
-            error_term = self.d_activation_times_vector(self.raw_out, d_raw)
+            error_term = self.d_activation_times_vector(self.out, dO)
         else:
-            error_term = d_raw * self.d_activation(self.net)
-        
-        self.grad_weights = (self.input.t() @ error_term) / m
-        self.grad_biases = tc.sum(error_term, dim=0, keepdims=True) / m
-        dO_prev = error_term @ self.weights.t()
+            error_term = dO * self.d_activation(self.net)
+        if self.use_rmsnorm:
+            d_net = self.rmsnorm.backward(error_term)
+        else:
+            d_net = error_term
+        self.grad_weights = (self.input.t() @ d_net) / m
+        self.grad_biases = tc.sum(d_net, dim=0, keepdims=True) / m
+        dO_prev = d_net @ self.weights.t()
         return dO_prev
 
     

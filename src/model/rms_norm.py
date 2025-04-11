@@ -6,19 +6,20 @@ class RMSNorm:
         self.beta = tc.zeros(num_features)  
 
     def forward(self, x):
+        self.input = x
         self.rms = tc.sqrt(tc.mean(x**2, dim=-1, keepdim=True) + self.eps)
         return self.gamma * (x / self.rms) + self.beta
     
-    def backward(self, x, error_term, m):
-        normalized = x / self.rms
-        self.grad_gamma = (error_term * normalized).sum(dim=0) / m
-        self.grad_beta = error_term.sum(dim=0)
-        dnormalized = error_term * self.gamma
-        n = x.shape[-1]
-        new_error_term = dnormalized / self.rms - x * ((dnormalized * x).sum(dim=-1, keepdim=True)) / (n * self.rms**3)
-        return new_error_term
+    def backward(self, grad_output):
+        normalized = self.input / self.rms
+        self.grad_gamma = (grad_output * normalized).sum(dim=0)
+        self.grad_beta = grad_output.sum(dim=0)
+        dnormalized = grad_output * self.gamma
+        n = self.input.shape[-1]
+        grad_input = dnormalized / self.rms - self.input * ((dnormalized * self.input).sum(dim=-1, keepdim=True)) / (n * self.rms**3)
+        return grad_input
     
     def update(self, learning_rate):
-        # self.gamma -= learning_rate * self.grad_gamma
-        # self.beta -= learning_rate * self.grad_beta
+        self.gamma -= learning_rate * self.grad_gamma
+        self.beta -= learning_rate * self.grad_beta
         return

@@ -21,6 +21,7 @@ class FFNN:
         self.loss_name = loss_function
         self.layers: list[Layer] = []
         for i in range(len(layer_sizes) - 1):
+            print(i)
             layer = Layer(
                 input_dim=layer_sizes[i],
                 output_dim=layer_sizes[i + 1],
