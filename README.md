@@ -2,7 +2,7 @@
 
 # 🧠 Custom Feedforward Neural Network (FFNN)
 
-Proyek ini adalah implementasi dari *Feedforward Neural Network (FFNN)* yang dibangun dari nol menggunakan PyTorch. Framework ini mendukung berbagai fungsi aktivasi, metode inisialisasi bobot, fungsi loss, serta opsional penggunaan RMS Normalization. Selain itu, disediakan juga fitur visualisasi struktur jaringan dan distribusi bobot/gradien.
+Proyek ini adalah implementasi dari _Feedforward Neural Network (FFNN)_ yang dibangun dari nol menggunakan PyTorch. Framework ini mendukung berbagai fungsi aktivasi, metode inisialisasi bobot, fungsi loss, serta opsional penggunaan RMS Normalization. Selain itu, disediakan juga fitur visualisasi struktur jaringan dan distribusi bobot/gradien.
 
 ## 📁 Struktur File
 
@@ -52,10 +52,9 @@ python -m ipykernel install --user --name=venv-ml49 --display-name "Python (ML-4
 
 Pastikan kernel `Python (ML-49)` dipilih saat membuka `main.ipynb` di VS Code.
 
-
 ### 3. Jalankan Notebook
 
-Buka `main.ipynb` di VS Code dan tekan tombol ▶️ (Run All) untuk mengeksekusi semua kode. 
+Buka `main.ipynb` di VS Code dan tekan tombol ▶️ (Run All) untuk mengeksekusi semua kode.
 Pastikan kernel Python yang sesuai sudah dipilih.
 
 Alternatif lain, jalankan dari terminal dengan:
@@ -88,16 +87,17 @@ model = FFNN(
     use_rmsnorm=True                                    # Gunakan RMSNorm di setiap layer
 )
 ```
+
 ### 📌 Detail Parameter `init_params`
 
 Parameter `init_params` adalah dictionary opsional untuk mengatur parameter tambahan sesuai metode inisialisasi bobot yang digunakan:
 
-| Metode Inisialisasi  | Parameter `init_params` yang Didukung                    | Default         |
-|----------------------|----------------------------------------------------------|-----------------|
-| `random_uniform`     | `lower`, `upper`, `seed`                                 | -0.5, 0.5, None |
-| `random_normal`      | `mean`, `variance`, `seed`                               | 0.0, 1.0, None  |
-| `zero`               | `seed` (optional, jarang digunakan)                      | None            |
-| `he_xavier`          | `seed` (otomatis memilih `he` atau `xavier` sesuai aktivasi) | None        |
+| Metode Inisialisasi | Parameter `init_params` yang Didukung                        | Default         |
+| ------------------- | ------------------------------------------------------------ | --------------- |
+| `random_uniform`    | `lower`, `upper`, `seed`                                     | -0.5, 0.5, None |
+| `random_normal`     | `mean`, `variance`, `seed`                                   | 0.0, 1.0, None  |
+| `zero`              | `seed` (optional, jarang digunakan)                          | None            |
+| `he_xavier`         | `seed` (otomatis memilih `he` atau `xavier` sesuai aktivasi) | None            |
 
 Contoh penggunaan:
 
@@ -108,7 +108,6 @@ init_params = {
     "upper": 1.0
 }
 ```
-
 
 ---
 
@@ -134,18 +133,17 @@ history = model.train(
 
 ### 📌 Penjelasan Parameter `.train()`
 
-| Parameter            | Deskripsi                                                                 |
-|----------------------|---------------------------------------------------------------------------|
-| `X_train`, `y_train` | Data training (dalam bentuk Tensor)                                       |
-| `X_val`, `y_val`     | Data validasi opsional                                                    |
-| `epochs`             | Jumlah iterasi penuh terhadap dataset                                     |
-| `batch_size`         | Jumlah sampel per batch                                                   |
-| `learning_rate`      | Ukuran langkah update bobot                                               |
-| `verbose`            | Tampilkan log training jika 1, tidak tampilkan jika 0                     |
-| `tol`                | Perbedaan minimum untuk mendeteksi konvergensi (untuk early stopping)     |
-| `patience`           | Jumlah epoch berturut-turut tanpa peningkatan sebelum berhenti training   |
-| `stop_in_convergence`| Jika `True`, aktifkan early stopping berdasarkan `tol` dan `patience`     |
-
+| Parameter             | Deskripsi                                                               |
+| --------------------- | ----------------------------------------------------------------------- |
+| `X_train`, `y_train`  | Data training (dalam bentuk Tensor)                                     |
+| `X_val`, `y_val`      | Data validasi opsional                                                  |
+| `epochs`              | Jumlah iterasi penuh terhadap dataset                                   |
+| `batch_size`          | Jumlah sampel per batch                                                 |
+| `learning_rate`       | Ukuran langkah update bobot                                             |
+| `verbose`             | Tampilkan log training jika 1, tidak tampilkan jika 0                   |
+| `tol`                 | Perbedaan minimum untuk mendeteksi konvergensi (untuk early stopping)   |
+| `patience`            | Jumlah epoch berturut-turut tanpa peningkatan sebelum berhenti training |
+| `stop_in_convergence` | Jika `True`, aktifkan early stopping berdasarkan `tol` dan `patience`   |
 
 ---
 
@@ -162,10 +160,8 @@ history = model.train(
 
 ## 👥 Pembagian Tugas
 
-| Nama Anggota         | NIM           | Tugas                                                                 |
-|----------------------|---------------|-----------------------------------------------------------------------|
-| Mesach Harmasendro   | 13522117     |                                                                      |
-| Enrique Yanuar       | 13522077     |                                                                      |
-| Wilson Yusda         | 13522019     |                                                                      |
-
-
+| Nama Anggota       | NIM      | Tugas         |
+| ------------------ | -------- | ------------- |
+| Mesach Harmasendro | 13522117 | Code, Laporan |
+| Enrique Yanuar     | 13522077 | Code, Laporan |
+| Wilson Yusda       | 13522019 | Code, Laporan |
